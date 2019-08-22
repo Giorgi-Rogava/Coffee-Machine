@@ -5,243 +5,172 @@ import java.util.*;
 
 public class CoffeeMachine {
 
-
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
 
-//        System.out.println("Write how many ml of water the coffee machine has: ");
-//        int inputVolumeOfWater = scanner.nextInt();
-//        System.out.println("Write how many ml of milk the coffee machine has: ");
-//        int inputVolumeOfMilk = scanner.nextInt();
-//        System.out.println("Write how many grams of coffee beans the coffee machine has: ");
-//        int inputWeightOfCoffeeBeans = scanner.nextInt();
-//
-//        System.out.println("Write how many cups of coffee you will need: ");
-//        int numberCupsOfCoffee = scanner.nextInt();
-//
-//        int result = countCupsOfCoffee(numberCupsOfCoffee, inputVolumeOfWater, inputVolumeOfMilk, inputWeightOfCoffeeBeans);
-//
-//        if (result != 0) {
-//            System.out.println(printAnswer(numberCupsOfCoffee, result));
-//        }
+        int water = 400, milk = 540, coffeeBeans = 120, money = 550, disposableCups = 9;
+        boolean exit = false;
 
-        ArrayList<Integer> returnNumbers = new ArrayList<Integer>();
+        String returnActionName = makeAction();
 
-        int money = 550, water = 1200;
-        int milk = 540, coffeeBeans = 120, disposableCups = 9;
+        while (true) {
 
-        String actionNameV1 = "";
-        hasResorces(money, water, milk, coffeeBeans, disposableCups);
-        System.out.println();
-        actionNameV1 = makeAction();
-        returnNumbers = (ArrayList<Integer>) Actions(actionNameV1);
+            switch (returnActionName) {
 
-        if (actionNameV1.equals("buy")) {
-            money += returnNumbers.get(3);
-            water -= returnNumbers.get(0);
-            milk -= returnNumbers.get(1);
-            coffeeBeans -= returnNumbers.get(2);
-            disposableCups -= returnNumbers.get(4);
-            System.out.println();
+                case "buy":
 
-            hasResorces(money, water, milk, coffeeBeans, disposableCups);
+                    List<Integer> listOfCoffeeTypeParams = chooseSpeciesOfCoffee();
 
-        } else if (actionNameV1.equals("fill")) {
+                    if (listOfCoffeeTypeParams.get(0) == 0) {
+                        returnActionName = makeAction();
+                        continue;
+                    }
 
-            water += returnNumbers.get(0);
-            milk += returnNumbers.get(1);
-            coffeeBeans += returnNumbers.get(2);
-            disposableCups += returnNumbers.get(3);
+                    if (water >= listOfCoffeeTypeParams.get(0) && milk >= listOfCoffeeTypeParams.get(1) && coffeeBeans >= listOfCoffeeTypeParams.get(2) && disposableCups >= listOfCoffeeTypeParams.get(4)) {
 
-            hasResorces(money, water, milk, coffeeBeans, disposableCups);
+                        water -= listOfCoffeeTypeParams.get(0);
+                        milk -= listOfCoffeeTypeParams.get(1);
+                        coffeeBeans -= listOfCoffeeTypeParams.get(2);
+                        money += listOfCoffeeTypeParams.get(3);
+                        disposableCups -= listOfCoffeeTypeParams.get(4);
 
-        } else if (actionNameV1.equals("take")) {
-            System.out.println("I gave you $" + money);
-            System.out.println();
-            money = 0;
-            hasResorces(money, water, milk, coffeeBeans, disposableCups);
+                        System.out.println("I have enough resources, making you a coffee! \n");
+
+                    } else {
+                        System.out.println("I can't make a cup of coffee. \n");
+                    }
+
+                    returnActionName = makeAction();
+                    continue;
+
+
+                case "fill":
+
+                    List<Integer> fillParametersList = fillCoffeeMachine();
+                    water += fillParametersList.get(0);
+                    milk += fillParametersList.get(1);
+                    coffeeBeans += fillParametersList.get(2);
+                    disposableCups += fillParametersList.get(3);
+
+                    returnActionName = makeAction();
+                    continue;
+
+
+                case "take":
+                    System.out.println("\nI gave you $" + money + "\n");
+                    money = 0;
+                    returnActionName = makeAction();
+                    continue;
+
+
+                case "remaining":
+                    hasResorces(money, water, milk, coffeeBeans, disposableCups);
+                    returnActionName = makeAction();
+                    continue;
+
+
+                case "exit":
+                    exit = true;
+                    break;
+            }
+
+            if (exit) {
+                break;
+            }
 
         }
 
-    }
-
-
-    public static int countCupsOfCoffee(int numberOfCups, int water, int milk, int coffeeBeans) {
-        List<Integer> possibleNumber = new ArrayList<Integer>();
-
-        if (numberOfCups == 0 && water == 0 && milk == 0 && coffeeBeans == 0) {
-            System.out.println("Yes, I can make that amount of coffee ");
-            return 0;
-        }
-
-        if (numberOfCups == 1 && water == 0 && milk == 0 && coffeeBeans == 0) {
-            System.out.println("No, I can make only 0 cup(s) of coffee ");
-            return 0;
-        }
-
-
-        int possibleVolumeOfWater = water / 200;
-        int possibleVolumeOfMilk = milk / 50;
-        int possibleWeightOfCoffeeBeans = coffeeBeans / 15;
-
-        possibleNumber.add(possibleVolumeOfWater);
-        possibleNumber.add(possibleVolumeOfMilk);
-        possibleNumber.add(possibleWeightOfCoffeeBeans);
-
-        int localresult = Collections.min(possibleNumber);
-
-
-        System.out.println(localresult);
-        return localresult;
-    }
-
-
-    public static String printAnswer(int numberOfCoffeeCups, int resultNumber) {
-        String stringResult = "";
-        if (numberOfCoffeeCups == resultNumber) {
-            stringResult = ("Yes, I can make that amount of coffee");
-        } else if (numberOfCoffeeCups > resultNumber) {
-            stringResult = ("No, I can make only " + resultNumber + " cup(s) of coffee");
-        } else if (numberOfCoffeeCups < resultNumber) {
-            stringResult = ("Yes, I can make that amount of coffee (and even " + (resultNumber - numberOfCoffeeCups) + " more than that)");
-        }
-        return stringResult;
     }
 
 
     public static void hasResorces(int money, int water, int milk, int coffeeBeans, int disposableCups) {
 
-        System.out.println("The coffee machine has:");
+        System.out.println("\nThe coffee machine has:");
         System.out.println(water + " of water ");
         System.out.println(milk + " of milk ");
         System.out.println(coffeeBeans + " of coffee beans ");
         System.out.println(disposableCups + " of disposable cups ");
-        System.out.println(money + " of money ");
-
+        System.out.println("$" + money + " of money \n");
     }
 
 
     public static String makeAction() {
-
-        System.out.println("Write action (buy, fill, take): ");
+        System.out.print("Write action (buy, fill, take , remaining, exit): ");
         Scanner scanner = new Scanner(System.in);
+        System.out.println();
         return scanner.nextLine();
-
     }
 
 
-    public static List<Integer> Actions(String nameOfAction) {
+    public static List chooseSpeciesOfCoffee() {
+
+        System.out.println("\nWhat do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino: ");
+        Scanner scanner = new Scanner(System.in);
+
+        int chosenNumber = 31;
+        String chosenString = scanner.nextLine();
+
+        if (chosenString.equals("back")) {
+            chosenNumber = 0;
+        } else {
+            chosenNumber = Integer.valueOf(chosenString);
+        }
 
 
-        if (nameOfAction.equals("buy")) {
+        switch (chosenNumber) {
 
-            System.out.println("What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino: ");
-            Scanner scanner = new Scanner(System.in);
-            int choice = scanner.nextInt();
-
-            switch (choice) {
-
-                case 1: // espresso
-
-                    ArrayList<Integer> parametersV1 = new ArrayList<Integer>();
-
-                    int waterVar = 250;
-                    parametersV1.add(waterVar);
-
-                    int milkVar = 0;
-                    parametersV1.add(milkVar);
-
-                    int beansVar = 16;
-                    parametersV1.add(beansVar);
-
-                    int moneyVar = 4;
-                    parametersV1.add(moneyVar);
-
-                    int disposableCupsVar = 1;
-                    parametersV1.add(disposableCupsVar);
+            case 0:
+                List goBack = Arrays.asList(0);
+                return goBack;
 
 
-                    return parametersV1;
+            case 1: // espresso
 
-                case 2: // latte
-                    ArrayList<Integer> parametersV2 = new ArrayList<Integer>();
+                List espressoParametersList = Arrays.asList(250, 0, 16, 4, 1);
 
-                    waterVar = 350;
-                    parametersV2.add(waterVar);
+                return espressoParametersList;
 
-                    milkVar = 75;
-                    parametersV2.add(milkVar);
+            case 2: // latte
 
-                    beansVar = 20;
-                    parametersV2.add(beansVar);
+                List latteParametersList = Arrays.asList(350, 75, 20, 7, 1);
 
-                    moneyVar = 7;
-                    parametersV2.add(moneyVar);
+                return latteParametersList;
 
-                    disposableCupsVar = 1;
-                    parametersV2.add(disposableCupsVar);
+            case 3: // cappuccino
 
+                List cappuccinoParametersList = Arrays.asList(200, 100, 12, 6, 1);
 
-                    return parametersV2;
-
-                case 3: // cappuccino
-
-                    ArrayList<Integer> parametersV3 = new ArrayList<Integer>();
-
-                    waterVar = 200;
-                    parametersV3.add(waterVar);
-
-                    milkVar = 100;
-                    parametersV3.add(milkVar);
-
-                    beansVar = 12;
-                    parametersV3.add(beansVar);
-
-                    moneyVar = 6;
-                    parametersV3.add(moneyVar);
-
-                    disposableCupsVar = 1;
-                    parametersV3.add(disposableCupsVar);
-
-                    return parametersV3;
-
-            }
-        } else if (nameOfAction.equals("fill")) {
-            ArrayList<Integer> parametersV4 = new ArrayList<Integer>();
-
-            Scanner scanner = new Scanner(System.in);
-
-            System.out.println("Write how many ml of water do you want to add: ");
-            int waterVar = scanner.nextInt();
-            parametersV4.add(waterVar);
-
-            System.out.println("Write how many ml of milk do you want to add: ");
-            int milkVar = scanner.nextInt();
-            parametersV4.add(milkVar);
-
-            System.out.println("Write how many grams of coffee beans do you want to add: ");
-            int beansVar = scanner.nextInt();
-            parametersV4.add(beansVar);
-
-            System.out.println("Write how many disposable cups of coffee do you want to add: ");
-            int disposableCupsVar = scanner.nextInt();
-            parametersV4.add(disposableCupsVar);
-            System.out.println();
-
-            return parametersV4;
-
+                return cappuccinoParametersList;
         }
         return null;
     }
+
+
+    public static List fillCoffeeMachine() {
+
+        Scanner scanner = new Scanner(System.in);
+        List<Integer> fillParametersList = new ArrayList<Integer>();
+
+        System.out.println("\nWrite how many ml of water do you want to add: ");
+        int inputWaterNumber = scanner.nextInt();
+        fillParametersList.add(inputWaterNumber);
+
+        System.out.println("Write how many ml of milk do you want to add: ");
+        int inputMilkNumber = scanner.nextInt();
+        fillParametersList.add(inputMilkNumber);
+
+        System.out.println("Write how many grams of coffee beans do you want to add: ");
+        int inputNumberOfCoffeeBeans = scanner.nextInt();
+        fillParametersList.add(inputNumberOfCoffeeBeans);
+
+        System.out.println("Write how many disposable cups of coffee do you want to add: ");
+        int inputNumberOfdisposableCups = scanner.nextInt();
+        fillParametersList.add(inputNumberOfdisposableCups);
+
+        System.out.println();
+
+        return fillParametersList;
+    }
 }
-
-
-
-
-
-
-
-
 
 
 
